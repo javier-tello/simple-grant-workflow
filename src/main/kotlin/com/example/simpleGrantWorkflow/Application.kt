@@ -1,6 +1,7 @@
 package com.example.simpleGrantWorkflow
 
-import com.example.simpleGrantWorkflow.routing.configureRouting
+import com.example.simpleGrantWorkflow.plugins.configureRouting
+import com.example.simpleGrantWorkflow.plugins.configureSerialization
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -9,4 +10,5 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     configureRouting()
+    configureSerialization()
 }
