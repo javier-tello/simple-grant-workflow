@@ -3,22 +3,18 @@ package com.example.simpleGrantWorkflow.repositories
 import com.example.simpleGrantWorkflow.models.Nonprofit
 
 class InMemoryNonProfitRepository : NonprofitRepository {
-    private val nonprofitStorage = mutableListOf<Nonprofit>()
+    private val nonprofitStorage = hashMapOf<String, Nonprofit>()
 
-    override fun save(nonprofit: Nonprofit): Boolean {
-        nonprofitStorage.add(nonprofit)
-        return true
+    override fun save(nonprofit: Nonprofit) {
+        nonprofitStorage[nonprofit.email] = nonprofit
     }
 
     override fun findAll(): List<Nonprofit> {
-        return nonprofitStorage.toList()
+        return nonprofitStorage.values.toList()
     }
 
-    override fun getAllEmailAddresses(): List<String> {
-        val emailAddresses = mutableListOf<String>()
-        for (nonprofit in nonprofitStorage) {
-            emailAddresses.add(nonprofit.email)
-        }
-        return emailAddresses
+
+    override fun findNonprofitByEmailAddress(emailAddress: String): Nonprofit? {
+        return nonprofitStorage.getOrDefault(emailAddress, null)
     }
 }

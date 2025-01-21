@@ -29,4 +29,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:2.3.13")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.13")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.10")
 }

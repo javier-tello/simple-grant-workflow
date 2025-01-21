@@ -5,6 +5,8 @@ import com.example.simpleGrantWorkflow.repositories.NonprofitRepository
 
 class NonprofitService(private val nonprofitRepository: NonprofitRepository) {
     fun getAllNonprofits(): List<Nonprofit> = nonprofitRepository.findAll()
-    fun getAllEmailAddresses(): List<String> = nonprofitRepository.getAllEmailAddresses()
-    fun createNonprofit(nonprofit: Nonprofit): Boolean = nonprofitRepository.save(nonprofit)
+
+    fun createNonprofit(nonprofit: Nonprofit) = nonprofitRepository.save(nonprofit)
+
+    fun findNonprofitByEmailAddress(emailAddress: String): Nonprofit? = nonprofitRepository.findNonprofitByEmailAddress(emailAddress)
 }
