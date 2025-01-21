@@ -1,22 +1,52 @@
 # simple-grant-workflow
 
-Take home challenge for Temelio
+Simple grant workflow is a simple API that will allow you to create basic nonprofits and send basic emails.
 
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
-Here are some useful links to get you started:
-
-- [Ktor Documentation](https://ktor.io/docs/home.html)
-- [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
-
-## Features
+## End Points 
 
 Here's a list of features included in this project:
 
-| Name                                               | Description                                                 |
-| ----------------------------------------------------|------------------------------------------------------------- |
-| [Routing](https://start.ktor.io/p/routing-default) | Allows to define structured routes and associated handlers. |
+| Name             | Type | Description                                                                                                                                                                                                                                                       |
+|------------------|------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /nonprofits      | GET  | Get a list of all nonprofits                                                                                                                                                                                                                                      |
+| /nonprofits      | POST | Create a nonprofit                                                                                                                                                                                                                                                |
+| /send-email      | POST | Sends an email to a nonprofit                                                                                                                                                                                                                                     |
+| /send-email/bulk | POST | Sends emails to a list of nonprofits and allows templatized message. Currently only supports {{name}} and {{address}} which will be taken from existing nonprofits. If email is not associated with a nonprofit, it will not send an email to that email address. |
+| /get-all-emails  | GET  | gets all emails sent to nonprofits                                                                                                                                                                                                                                |
+
+## Definitions for POST requests
+
+`/nonprofts`
+```
+{
+    "name": "Sample Nonprofit",
+    "email": "emailme@example.com",
+    "address": "111 Second St"
+}
+ ```
+
+`/send-email`
+```
+{
+    "to": "nonprofit@nonprofit.com",
+    "from": "me@myemail.com",
+    "subject": "Import Info",
+    "body": "I am doanting money to this nonprofit"
+}
+```
+
+`/send-email/bulk`
+```
+{
+    "to": ["emailme@example1.com", "emailme@example2.com", "emailme@example3.com"],
+    "from": "me@myemail.com",
+    "subject": "Import Info",
+    "body": "Sending money to nonprofit {{name}} at address {{address}}"
+}
+```
+
 
 ## Building & Running
 
