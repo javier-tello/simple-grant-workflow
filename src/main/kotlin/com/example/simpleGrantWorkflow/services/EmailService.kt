@@ -15,22 +15,40 @@ class EmailService(private val emailRepository: EmailRepository,  private val te
     fun processAndSendBulkEmails(bulkEmailRequest: BulkEmailRequest, nonprofitService: NonprofitService): BulkEmailResponse {
         require(bulkEmailRequest.to.isNotEmpty()) { "Recipient list cannot be empty" }
 
+        val cc = bulkEmailRequest.cc
+        val bcc = bulkEmailRequest.bcc
+
         val skippedEmails = mutableListOf<String>()
-        val (successfulEmails, failedEmails) = bulkEmailRequest.to.mapNotNull { emailAddress ->
-            val nonprofit = nonprofitService.findNonprofitByEmailAddress(emailAddress)
+        var successCount = 0
+        var failCount = 0
+        var failedEmails = emptyList<String>()
+        for(sendTo in bulkEmailRequest.to){
+            val nonprofit = nonprofitService.findNonprofitByEmailAddress(sendTo)
             if (nonprofit == null) {
-                skippedEmails.add(emailAddress)
-                null
+                skippedEmails.add(sendTo)
+                failCount++
             } else {
-                val email = buildEmail(bulkEmailRequest, nonprofit, emailAddress)
-                emailAddress to sendEmail(email)
+                val email = buildEmail(bulkEmailRequest, nonprofit, sendTo, cc, bcc)
+
+                if (cc.isNotEmpty()){
+                    sendEmailToCC(bulkEmailRequest, nonprofit, cc, cc, bcc)
+                    successCount++
+                }
+
+                if (bcc.isNotEmpty()){
+                    sendEmailToBcc(bulkEmailRequest, nonprofit, bcc, cc, bcc)
+                    successCount++
+                }
+
+                sendEmail(email)
+                successCount++
             }
-        }.partition { it.second }
+        }
 
         return BulkEmailResponse(
-            successCount = successfulEmails.size,
-            failureCount = failedEmails.size,
-            failedEmails = failedEmails.map { "Failed to send email to ${it.first}" },
+            successCount = successCount,
+            failureCount = failCount,
+            failedEmails = failedEmails,
             message = if (failedEmails.isEmpty()) "All emails sent successfully" else "Some emails failed",
             skippedEmails = skippedEmails
         )
@@ -44,8 +62,18 @@ class EmailService(private val emailRepository: EmailRepository,  private val te
         return templateProcessor.processTemplate(bodyTemplate, placeholders)
     }
 
-    private fun buildEmail(bulkEmailRequest: BulkEmailRequest, nonprofit: Nonprofit, emailAddress: String): Email {
+    private fun buildEmail(bulkEmailRequest: BulkEmailRequest, nonprofit: Nonprofit, emailAddress: String, cc: String, bcc: String): Email {
         val processedBody = processEmailBody(bulkEmailRequest.body, nonprofit)
-        return Email(to = emailAddress, from = bulkEmailRequest.from, subject = bulkEmailRequest.subject, body = processedBody)
+        return Email(to = emailAddress, from = bulkEmailRequest.from, subject = bulkEmailRequest.subject, body = processedBody, cc = cc, bcc = bcc)
+    }
+
+    private fun sendEmailToCC(bulkEmailRequest: BulkEmailRequest, nonprofit: Nonprofit, emailAddressReceiepnt: String, cc: String, bcc: String) {
+        val ccEmail = buildEmail(bulkEmailRequest, nonprofit, cc, cc, bcc)
+        sendEmail(ccEmail)
+    }
+
+    private fun sendEmailToBcc(bulkEmailRequest: BulkEmailRequest, nonprofit: Nonprofit, emailAddressReceiepnt: String, cc: String, bcc: String){
+        val bccEmail = buildEmail(bulkEmailRequest, nonprofit, bcc, cc,bcc)
+        sendEmail(bccEmail)
     }
 }
